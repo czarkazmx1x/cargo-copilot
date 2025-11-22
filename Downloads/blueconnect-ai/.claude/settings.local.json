@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm search:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:render.com)",
+      "Bash(curl:*)",
+      "Bash(powershell -Command \"Expand-Archive -Path render-cli.zip -DestinationPath . -Force\")",
+      "Bash(./render.exe:*)",
+      "Bash(echo:*)",
+      "Bash(~/bin/render.exe:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
