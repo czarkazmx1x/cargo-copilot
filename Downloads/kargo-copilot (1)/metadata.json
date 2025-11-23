@@ -1,0 +1,5 @@
+{
+  "name": "Kargo Copilot",
+  "description": "AI-powered customs compliance automation embedded app. Classify products for international shipping using Gemini Vision and Text analysis.",
+  "requestFramePermissions": []
+}

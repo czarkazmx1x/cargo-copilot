@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kargo Kopilot</title>
+    <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              shopify: {
+                base: '#f1f2f4',
+                surface: '#ffffff',
+                primary: '#008060', // Legacy Green
+                primaryDark: '#004c3f',
+                nav: '#1a1a1a',
+                text: '#202223',
+                subdued: '#6d7175',
+                border: '#e1e3e5',
+                highlight: '#edfffa',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+      body {
+        background-color: #f1f2f4; /* Shopify App Background */
+        font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      }
+      /* Custom Scrollbar for table containers */
+      .custom-scrollbar::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #c1c1c1; 
+        border-radius: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8; 
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.4.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
