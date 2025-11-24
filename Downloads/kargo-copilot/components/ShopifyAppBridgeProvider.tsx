@@ -1,6 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { createApp } from '@shopify/app-bridge';
-import { Provider as AppBridgeProvider, Loading } from '@shopify/app-bridge-react';
 import { AppProvider } from '@shopify/polaris';
 import '@shopify/polaris/build/esm/styles.css';
 
@@ -200,20 +199,20 @@ export const ShopifyAppBridgeProvider: React.FC<ShopifyAppBridgeProviderProps> =
     host,
   };
 
-  // If App Bridge is configured, wrap with AppBridgeProvider
-  if (appBridgeConfig) {
-    return (
-      <ShopifyAppBridgeContext.Provider value={contextValue}>
-        <AppBridgeProvider config={appBridgeConfig}>
-          <AppProvider i18n={{}}>
-            {children}
-          </AppProvider>
-        </AppBridgeProvider>
-      </ShopifyAppBridgeContext.Provider>
-    );
-  }
+  // Initialize App Bridge and store in window for access by hooks
+  useEffect(() => {
+    if (appBridgeConfig) {
+      try {
+        const app = createApp(appBridgeConfig);
+        (window as any).app = app;
+        console.log('[App Bridge] ✓ App Bridge instance created and attached to window');
+      } catch (error) {
+        console.error('[App Bridge] Failed to create app instance:', error);
+      }
+    }
+  }, [appBridgeConfig]);
 
-  // Development mode - no App Bridge
+  // Render with Polaris AppProvider
   return (
     <ShopifyAppBridgeContext.Provider value={contextValue}>
       <AppProvider i18n={{}}>
