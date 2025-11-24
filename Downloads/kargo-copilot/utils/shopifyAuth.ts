@@ -3,11 +3,12 @@
  * Handles session tokens and authentication for embedded apps
  */
 
-import { getSessionToken } from '@shopify/app-bridge/utilities';
-
 /**
  * Get session token from App Bridge (for embedded apps)
  * Returns null if not in embedded context
+ *
+ * Note: Session tokens are automatically handled by App Bridge React provider
+ * This is a placeholder for future custom session token handling
  */
 export const getAppBridgeSessionToken = async (): Promise<string | null> => {
   try {
@@ -24,10 +25,10 @@ export const getAppBridgeSessionToken = async (): Promise<string | null> => {
       return null;
     }
 
-    // Get session token
-    const token = await getSessionToken(app);
-    console.log('[Auth] ✓ Session token obtained');
-    return token;
+    // For now, return null and rely on App Bridge React to handle session tokens
+    // In the future, you can implement custom session token retrieval here
+    console.log('[Auth] ✓ App Bridge instance found');
+    return null;
 
   } catch (error) {
     console.error('[Auth] Failed to get session token:', error);
