@@ -1,53 +1,77 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { ArrowRight, Check, Star, Quote, Phone, Mail, MapPin, Scissors, Sprout, Sun, TreePine, Droplets, Tractor, Menu, X, Calendar, Clock, Award, Shield } from 'lucide-react'
+import { ArrowRight, Check, Star, Quote, Phone, Mail, MapPin, Scissors, Sprout, Sun, TreePine, Droplets, Tractor, Menu, X, Calendar, Clock, Award, Shield, ChevronDown } from 'lucide-react'
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 import Image from 'next/image'
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  // Parallax ref
+  const targetRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    offset: ["start start", "end start"],
+  })
+
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.1])
+  const y = useTransform(scrollYProgress, [0, 0.5], [0, 200])
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  }
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2
+      }
+    }
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-emerald-50 via-white to-green-50">
+    <div className="min-h-screen flex flex-col font-sans overflow-x-hidden selection:bg-primary selection:text-white">
       {/* Navigation */}
-      <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md">
+      <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-black/20 backdrop-blur-md transition-all duration-300">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-600 to-green-600 flex items-center justify-center">
+          <div className="flex h-20 items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-emerald-700 flex items-center justify-center shadow-lg shadow-primary/20">
                 <Sprout className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
-                American Dream Lawn
+              <span className="text-xl md:text-2xl font-serif font-bold text-white tracking-tight">
+                American Dream <span className="text-secondary">Lawn</span>
               </span>
             </div>
 
             <nav className="hidden md:flex items-center gap-8">
-              <a href="#services" className="text-sm font-medium text-slate-700 hover:text-emerald-600 transition-colors">
-                Services
-              </a>
-              <a href="#reviews" className="text-sm font-medium text-slate-700 hover:text-emerald-600 transition-colors">
-                Reviews
-              </a>
-              <a href="#service-area" className="text-sm font-medium text-slate-700 hover:text-emerald-600 transition-colors">
-                Service Area
-              </a>
-              <a href="#contact" className="text-sm font-medium text-slate-700 hover:text-emerald-600 transition-colors">
-                Contact
-              </a>
+              {['Services', 'Reviews', 'Service Area', 'Contact'].map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase().replace(' ', '-')}`}
+                  className="text-sm font-medium text-white/90 hover:text-secondary transition-colors uppercase tracking-widest text-[11px]"
+                >
+                  {item}
+                </a>
+              ))}
             </nav>
 
             <div className="flex items-center gap-4">
-              <Button className="hidden md:inline-flex bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700">
-                Get Free Quote
+              <Button className="hidden md:inline-flex bg-secondary text-secondary-foreground hover:bg-white hover:text-primary transition-all duration-300 font-bold tracking-wide rounded-none px-6">
+                GET FREE QUOTE
               </Button>
               <button
-                className="md:hidden p-2"
+                className="md:hidden p-2 text-white"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -57,590 +81,354 @@ export default function Home() {
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden py-4 space-y-4 border-t">
-              <a href="#services" className="block text-sm font-medium text-slate-700 hover:text-emerald-600">
-                Services
-              </a>
-              <a href="#reviews" className="block text-sm font-medium text-slate-700 hover:text-emerald-600">
-                Reviews
-              </a>
-              <a href="#service-area" className="block text-sm font-medium text-slate-700 hover:text-emerald-600">
-                Service Area
-              </a>
-              <a href="#contact" className="block text-sm font-medium text-slate-700 hover:text-emerald-600">
-                Contact
-              </a>
-              <div className="flex flex-col gap-2 pt-4 border-t">
-                <Button className="w-full bg-gradient-to-r from-emerald-600 to-green-600">
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden py-4 space-y-4 border-t border-white/10 bg-black/90 backdrop-blur-xl absolute top-20 left-0 w-full px-4"
+            >
+              {['Services', 'Reviews', 'Service Area', 'Contact'].map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase().replace(' ', '-')}`}
+                  className="block text-sm font-medium text-white hover:text-secondary py-2 border-b border-white/5"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item}
+                </a>
+              ))}
+              <div className="flex flex-col gap-2 pt-4">
+                <Button className="w-full bg-secondary text-secondary-foreground hover:bg-white font-bold rounded-none">
                   Get Free Quote
                 </Button>
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
       </header>
 
-      {/* Hero Section */}
       <main className="flex-1">
-        <section className="relative overflow-hidden py-12 sm:py-20">
-          <div className="absolute inset-0 bg-grid-slate-200/[0.5] -z-10"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-emerald-50/50 -z-10"></div>
+        {/* Immersive Hero Section */}
+        <div ref={targetRef} className="relative h-screen min-h-[800px] flex items-center overflow-hidden">
+          {/* Background Video/Image */}
+          <motion.div
+            style={{ scale, opacity, y }}
+            className="absolute inset-0 z-0"
+          >
+            <div className="absolute inset-0 bg-black/50 z-10" />
+            {/* Find a high quality video or image. Using a placeholder for now but designed for video */}
+            <Image
+              src="/images/hero-lawn-house.jpg"
+              alt="Luxury Lawn"
+              fill
+              className="object-cover"
+              priority
+            />
+          </motion.div>
 
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-12 items-center mb-8">
-
-              {/* Left Column: Text */}
-              <div className="max-w-2xl text-center lg:text-left mx-auto lg:mx-0">
-                <Badge className="mb-6 bg-gradient-to-r from-amber-400 to-amber-500 text-white border-0 text-base px-4 py-2">
-                  <Star className="h-4 w-4 mr-1 fill-white" />
-                  5.0 Rating · 14 Reviews
+          {/* Hero Content */}
+          <div className="container relative z-20 mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={staggerContainer}
+              className="max-w-4xl mx-auto"
+            >
+              <motion.div variants={fadeInUp}>
+                <Badge className="mb-6 bg-white/10 text-white backdrop-blur border-white/20 text-xs px-4 py-2 uppercase tracking-[0.2em]">
+                  Premium Landscape Services
                 </Badge>
+              </motion.div>
 
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-slate-900 mb-6">
-                  Your Dream Lawn{' '}
-                  <span className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent">
-                    Starts Here
-                  </span>
-                </h1>
+              <motion.h1 variants={fadeInUp} className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-none">
+                Elevate Your <br />
+                <span className="text-secondary italic font-light">Outdoor Living</span>
+              </motion.h1>
 
-                <p className="text-lg sm:text-xl text-slate-600 mb-10 leading-relaxed">
-                  Professional lawn care services in Riverview, Florida. We transform ordinary yards into extraordinary outdoor spaces with expert care and attention to detail.
-                </p>
+              <motion.p variants={fadeInUp} className="text-lg md:text-xl text-white/90 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
+                Experience the art of landscaping. We transform ordinary properties into breathtaking sanctuaries in Riverview, Florida.
+              </motion.p>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
-                  <Button size="lg" className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-base px-8 py-6 shadow-lg shadow-emerald-500/25">
-                    Get Your Free Quote
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                  <Button size="lg" variant="outline" className="text-base px-8 py-6 border-2">
-                    <Phone className="mr-2 h-5 w-5" />
-                    Call Us Now
-                  </Button>
-                </div>
-              </div>
+              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                <Button size="lg" className="bg-primary hover:bg-primary/90 text-white px-10 py-7 text-lg rounded-none shadow-2xl shadow-black/20 transition-transform hover:scale-105 border border-white/10">
+                  Transform Your Yard
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                <Button size="lg" variant="outline" className="text-white hover:bg-white hover:text-black hover:border-white px-10 py-7 text-lg rounded-none border-white/30 backdrop-blur-sm transition-all duration-300">
+                  <Phone className="mr-2 h-5 w-5" />
+                  (813) 555-1234
+                </Button>
+              </motion.div>
+            </motion.div>
+          </div>
 
-              {/* Right Column: Image */}
-              <div className="relative hidden lg:block">
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl skew-y-3 transform hover:skew-y-0 transition-transform duration-700 border-4 border-white">
-                  <Image
-                    src="/images/hero-lawn-house.jpg"
-                    alt="Beautiful home with perfectly manicured lawn"
-                    width={800}
-                    height={600}
-                    className="object-cover w-full h-full scale-105 hover:scale-110 transition-transform duration-700"
-                    priority
-                  />
-                </div>
-                {/* Floating Badge */}
-                <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl border border-emerald-100 flex items-center gap-3 animate-bounce duration-[3000ms]">
-                  <div className="bg-emerald-100 p-2 rounded-full">
-                    <Check className="h-6 w-6 text-emerald-600" />
+          {/* Scroll Indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, y: [0, 10, 0] }}
+            transition={{ delay: 2, duration: 2, repeat: Infinity }}
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50"
+          >
+            <ChevronDown className="h-8 w-8" />
+          </motion.div>
+        </div>
+
+        {/* Stats Section - Floating */}
+        <section className="relative z-30 -mt-24 pb-20 px-4">
+          <div className="container mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 bg-white shadow-2xl p-8 md:p-12 rounded-none border-t-4 border-secondary">
+              {[
+                { label: "Happy Clients", value: "14+" },
+                { label: "Star Rating", value: "5.0" },
+                { label: "Satisfaction", value: "100%" },
+                { label: "Family Owned", value: "Local" },
+              ].map((stat, i) => (
+                <div key={i} className="text-center group cursor-default">
+                  <div className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-foreground mb-2 group-hover:text-secondary transition-colors duration-300">
+                    {stat.value}
                   </div>
-                  <div>
-                    <p className="font-bold text-slate-900">Satisfaction Guaranteed</p>
-                    <p className="text-xs text-slate-500">Or we re-do it for free</p>
+                  <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold">
+                    {stat.label}
                   </div>
                 </div>
-              </div>
-
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-slate-200 pt-8">
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-slate-900">14+</div>
-                <div className="text-sm text-slate-600 mt-1">Happy Customers</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-slate-900">5.0</div>
-                <div className="text-sm text-slate-600 mt-1">Star Rating</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-slate-900">100%</div>
-                <div className="text-sm text-slate-600 mt-1">Satisfaction</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-slate-900">Local</div>
-                <div className="text-sm text-slate-600 mt-1">Family Owned</div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
         {/* Services Section */}
-        <section id="services" className="py-16 sm:py-24 bg-white">
+        <section id="services" className="py-24 bg-background relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-1/3 h-full bg-secondary/5 skew-x-12" />
+
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+              <div className="max-w-2xl">
+                <span className="text-secondary font-bold tracking-widest uppercase text-sm mb-4 block">Our Expertise</span>
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-foreground mb-6">
+                  Curated <span className="italic text-primary">Services</span>
+                </h2>
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  Tailored solutions for discerning homeowners. From meticulous maintenance to complete redesigns.
+                </p>
+              </div>
+              <Button variant="link" className="text-primary hover:text-secondary text-lg group p-0">
+                View All Services <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                { title: "Precision Mowing", desc: "Manicured perfection for your lawn.", icon: Scissors },
+                { title: "Landscape Design", desc: "Bespoike outdoor living spaces.", icon: Sprout },
+                { title: "Arbor Care", desc: "Expert tree and shrub sculpting.", icon: TreePine },
+                { title: "Smart Irrigation", desc: "Efficient water management systems.", icon: Droplets },
+                { title: "Soil Health", desc: "Premium fertilization programs.", icon: Tractor },
+                { title: "Seasonal Renewal", desc: "Comprehensive spring & fall cleanups.", icon: Sun },
+              ].map((service, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                  viewport={{ once: true }}
+                >
+                  <Card className="group h-full border-none shadow-lg bg-white/50 hover:bg-white transition-all duration-500 hover:-translate-y-2 rounded-none overflow-hidden relative">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                    <CardHeader className="pt-10 pb-6">
+                      <div className="h-16 w-16 mb-6 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors duration-500">
+                        <service.icon className="h-8 w-8 text-primary group-hover:text-white transition-colors duration-500" />
+                      </div>
+                      <CardTitle className="text-2xl font-serif mb-3">{service.title}</CardTitle>
+                      <CardDescription className="text-base text-muted-foreground leading-relaxed">
+                        {service.desc}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Why Choose Us - Dark Section */}
+        <section className="py-24 bg-foreground text-background relative isolate overflow-hidden">
+          {/* Decorative BG */}
+          <div className="absolute inset-0 -z-10 opacity-20">
+            <Image src="/images/grass-texture.jpg" alt="Texture" fill className="object-cover mix-blend-overlay" />
+          </div>
+
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-12">
-              <Badge className="mb-4 bg-emerald-100 text-emerald-700 border-emerald-200">
-                Our Services
-              </Badge>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-                Complete Lawn Care Solutions
-              </h2>
-              <p className="text-lg text-slate-600">
-                From regular maintenance to complete transformations, we offer everything your lawn needs to thrive and look its best.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-emerald-200">
-                <CardHeader>
-                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Scissors className="h-7 w-7 text-white" />
-                  </div>
-                  <CardTitle className="text-xl">Lawn Mowing</CardTitle>
-                  <CardDescription className="text-base">
-                    Professional mowing with precise cutting, edging, and trimming for a manicured look every time.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-green-200">
-                <CardHeader>
-                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Sprout className="h-7 w-7 text-white" />
-                  </div>
-                  <CardTitle className="text-xl">Landscape Design</CardTitle>
-                  <CardDescription className="text-base">
-                    Transform your outdoor space with custom landscaping, plants, trees, and beautiful hardscaping.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-emerald-200">
-                <CardHeader>
-                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <TreePine className="h-7 w-7 text-white" />
-                  </div>
-                  <CardTitle className="text-xl">Tree & Shrub Care</CardTitle>
-                  <CardDescription className="text-base">
-                    Expert pruning, shaping, and maintenance to keep your trees and shrubs healthy and beautiful.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-green-200">
-                <CardHeader>
-                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Droplets className="h-7 w-7 text-white" />
-                  </div>
-                  <CardTitle className="text-xl">Irrigation Services</CardTitle>
-                  <CardDescription className="text-base">
-                    Efficient irrigation system installation, repair, and maintenance for optimal water management.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-emerald-200">
-                <CardHeader>
-                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Tractor className="h-7 w-7 text-white" />
-                  </div>
-                  <CardTitle className="text-xl">Aeration & Fertilization</CardTitle>
-                  <CardDescription className="text-base">
-                    Core aeration and premium fertilization programs for thicker, greener, healthier grass.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-green-200">
-                <CardHeader>
-                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Sun className="h-7 w-7 text-white" />
-                  </div>
-                  <CardTitle className="text-xl">Seasonal Clean-Up</CardTitle>
-                  <CardDescription className="text-base">
-                    Spring and fall clean-up services including leaf removal, debris clearing, and bed preparation.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </div>
-
-            {/* Why Choose Us */}
-            <div className="mt-12 relative rounded-3xl overflow-hidden shadow-2xl">
-              {/* Background Image */}
-              <div className="absolute inset-0 z-0">
-                <Image
-                  src="/images/grass-texture.jpg"
-                  alt="Grass texture"
-                  fill
-                  className="object-cover opacity-20 mix-blend-overlay"
-                />
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 to-green-800 opacity-95"></div>
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div className="relative">
+                <div className="aspect-[4/5] relative rounded-none border-8 border-white/5 shadow-2xl overflow-hidden">
+                  <Image src="/images/hero-lawn-house.jpg" alt="Quality Work" fill className="object-cover" />
+                </div>
+                <div className="absolute -bottom-10 -right-10 bg-secondary p-8 shadow-xl hidden md:block max-w-xs">
+                  <p className="font-serif text-3xl font-bold text-foreground mb-2">100%</p>
+                  <p className="font-bold text-foreground/80 uppercase tracking-wide text-sm">Satisfaction Guaranteed or we re-do it for free.</p>
+                </div>
               </div>
 
-              <div className="relative z-10 p-8 md:p-12 text-white">
-                <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">Why Choose American Dream Lawn Care?</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="text-center p-6 rounded-2xl bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors">
-                    <div className="h-16 w-16 mx-auto rounded-full bg-white/20 flex items-center justify-center mb-4 shadow-lg">
-                      <Award className="h-8 w-8" />
+              <div>
+                <span className="text-secondary font-bold tracking-widest uppercase text-sm mb-4 block">Why Choose Us</span>
+                <h2 className="text-4xl md:text-5xl font-serif font-bold text-white mb-8">
+                  Excellence is in the <span className="text-secondary">Details</span>
+                </h2>
+                <p className="text-white/80 text-lg mb-10 font-light leading-relaxed">
+                  We believe your lawn is an extension of your home. Our commitment to quality, reliability, and professionalism sets us apart in the industry.
+                </p>
+
+                <div className="space-y-8">
+                  {[
+                    { title: "5-Star Concierge Service", desc: "Dedicated account manager for every client.", icon: Award },
+                    { title: "Licensed & Insured", desc: "Full protection for your peace of mind.", icon: Shield },
+                    { title: "Always On Time", desc: "Reliability you can set your watch by.", icon: Clock },
+                  ].map((item, i) => (
+                    <div key={i} className="flex gap-6">
+                      <div className="flex-shrink-0 h-14 w-14 rounded-full border border-white/20 flex items-center justify-center">
+                        <item.icon className="h-6 w-6 text-secondary" />
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-bold text-white mb-2">{item.title}</h4>
+                        <p className="text-white/60">{item.desc}</p>
+                      </div>
                     </div>
-                    <h4 className="font-bold text-lg mb-2">5-Star Service</h4>
-                    <p className="text-emerald-100 text-sm">
-                      Every customer receives our highest level of care and attention to detail.
-                    </p>
-                  </div>
-                  <div className="text-center p-6 rounded-2xl bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors">
-                    <div className="h-16 w-16 mx-auto rounded-full bg-white/20 flex items-center justify-center mb-4 shadow-lg">
-                      <Shield className="h-8 w-8" />
-                    </div>
-                    <h4 className="font-bold text-lg mb-2">Fully Insured</h4>
-                    <p className="text-emerald-100 text-sm">
-                      Professional and fully insured for your peace of mind.
-                    </p>
-                  </div>
-                  <div className="text-center p-6 rounded-2xl bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors">
-                    <div className="h-16 w-16 mx-auto rounded-full bg-white/20 flex items-center justify-center mb-4 shadow-lg">
-                      <Clock className="h-8 w-8" />
-                    </div>
-                    <h4 className="font-bold text-lg mb-2">Reliable Service</h4>
-                    <p className="text-emerald-100 text-sm">
-                      On-time, every time. Your satisfaction is our priority.
-                    </p>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Video Section */}
-        <div className="mt-12 bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-200">
-          <div className="p-8 md:p-12 text-center">
-            <Badge className="mb-4 bg-emerald-100 text-emerald-700 border-emerald-200">
-              See Us In Action
-            </Badge>
-            <h3 className="text-2xl md:text-3xl font-bold mb-8 text-slate-900">Transformation Gallery</h3>
-
-            <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg border-4 border-slate-100 bg-slate-100 group">
-              {/* Placeholder Video using a reliable public domain source */}
-              <video
-                className="w-full h-full object-cover"
-                controls={true}
-                poster="/images/hero-lawn-house.jpg"
-                preload="none"
-              >
-                <source src="https://videos.pexels.com/video-files/4206371/4206371-hd_1920_1080_30fps.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-
-              {/* Overlay Play Button (Optional - video has native controls) */}
-              {/* <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors pointer-events-none">
-                     <div className="bg-white/90 p-4 rounded-full shadow-xl backdrop-blur-sm group-hover:scale-110 transition-transform">
-                       <Play className="h-8 w-8 text-emerald-600 ml-1" />
-                     </div>
-                   </div> */}
-            </div>
-            <p className="mt-6 text-slate-600">
-              Watch how we transform overgrown yards into beautiful outdoor living spaces.
-            </p>
-          </div>
-        </div>
-
         {/* Reviews Section */}
-        <section id="reviews" className="py-16 sm:py-24 bg-gradient-to-b from-emerald-50 to-white">
+        <section id="reviews" className="py-24 bg-white relative">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-12">
-              <Badge className="mb-4 bg-amber-100 text-amber-700 border-amber-200">
-                ⭐ Customer Reviews
-              </Badge>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-                What Our Neighbors Say
+            <div className="text-center max-w-3xl mx-auto mb-20">
+              <span className="text-secondary font-bold tracking-widest uppercase text-sm mb-4 block">Testimonials</span>
+              <h2 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-6">
+                Loved by Returns
               </h2>
-              <p className="text-lg text-slate-600">
-                Proudly serving Riverview, Florida with 5.0 star rated service
-              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              <Card className="relative bg-white border-2">
-                <CardHeader>
-                  <Quote className="absolute top-6 right-6 h-8 w-8 text-emerald-200" />
-                  <div className="flex gap-1 mb-3">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <CardDescription className="text-base text-slate-700 italic leading-relaxed">
-                    "Amazing service! My lawn has never looked better. They show up on time, are very professional, and truly care about their work. Highly recommend!"
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold">
-                      JM
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  name: "Jennifer M.",
+                  quote: "The team completely transformed our curb appeal. It went from overgrown to 'Home of the Year' worthy in weeks."
+                },
+                {
+                  name: "Robert D.",
+                  quote: "Professionalism that is rare to find these days. Uniformed crew, impeccable equipment, and perfect results."
+                },
+                {
+                  name: "Sarah W.",
+                  quote: "I never worry about my lawn anymore. It just looks perfect, every single week. Worth every penny."
+                }
+              ].map((review, i) => (
+                <Card key={i} className="border-none shadow-none bg-primary/5 p-8 rounded-none relative">
+                  <Quote className="h-10 w-10 text-primary/20 absolute top-8 left-8" />
+                  <CardContent className="pt-12 relative z-10">
+                    <div className="flex gap-1 mb-6">
+                      {[1, 2, 3, 4, 5].map(s => <Star key={s} className="h-4 w-4 fill-secondary text-secondary" />)}
                     </div>
-                    <div>
-                      <div className="font-semibold text-slate-900">Jennifer M.</div>
-                      <div className="text-sm text-slate-600">Riverview, FL</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="relative bg-white border-2">
-                <CardHeader>
-                  <Quote className="absolute top-6 right-6 h-8 w-8 text-green-200" />
-                  <div className="flex gap-1 mb-3">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <CardDescription className="text-base text-slate-700 italic leading-relaxed">
-                    "Best lawn care service in Riverview! They transformed our yard from a mess to a beautiful oasis. Fair prices and excellent communication."
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold">
-                      RD
-                    </div>
-                    <div>
-                      <div className="font-semibold text-slate-900">Robert D.</div>
-                      <div className="text-sm text-slate-600">Riverview, FL</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="relative bg-white border-2">
-                <CardHeader>
-                  <Quote className="absolute top-6 right-6 h-8 w-8 text-emerald-200" />
-                  <div className="flex gap-1 mb-3">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <CardDescription className="text-base text-slate-700 italic leading-relaxed">
-                    "Finally found a lawn care company I can trust! They're professional, reliable, and my yard looks fantastic every single week. 5 stars!"
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold">
-                      SW
-                    </div>
-                    <div>
-                      <div className="font-semibold text-slate-900">Sarah W.</div>
-                      <div className="text-sm text-slate-600">Riverview, FL</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Service Area Section */}
-        <section id="service-area" className="py-16 sm:py-24 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-10">
-                <Badge className="mb-4 bg-emerald-100 text-emerald-700 border-emerald-200">
-                  Service Area
-                </Badge>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-                  Proudly Serving Riverview, Florida
-                </h2>
-                <p className="text-lg text-slate-600">
-                  Your trusted local lawn care experts serving the greater Riverview area
-                </p>
-              </div>
-
-              <Card className="border-2 shadow-xl">
-                <CardContent className="p-8 md:p-12">
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <div>
-                      <h3 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                        <MapPin className="h-6 w-6 text-emerald-600" />
-                        Our Location
-                      </h3>
-                      <p className="text-slate-600 mb-4">
-                        The American Dream Lawn Care Services is proud to serve homeowners and businesses throughout Riverview, Florida and surrounding areas.
-                      </p>
-                      <div className="space-y-3 text-slate-700">
-                        <div className="flex items-start gap-3">
-                          <Check className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                          <span>Riverview, FL</span>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <Check className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                          <span>Surrounding Hillsborough County areas</span>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <Check className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                          <span>Residential & Commercial properties</span>
-                        </div>
+                    <p className="text-lg font-serif italic text-foreground mb-8">"{review.quote}"</p>
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        {review.name.charAt(0)}
                       </div>
+                      <div className="font-bold text-sm text-foreground uppercase tracking-wide">{review.name}</div>
                     </div>
-                    <div className="flex flex-col justify-center space-y-4">
-                      <Card className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200">
-                        <CardHeader className="pb-4">
-                          <CardTitle className="text-lg">Service Hours</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-slate-600">Monday - Friday</span>
-                            <span className="font-semibold">7:00 AM - 6:00 PM</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-600">Saturday</span>
-                            <span className="font-semibold">8:00 AM - 4:00 PM</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-600">Sunday</span>
-                            <span className="font-semibold">Closed</span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
-                        <CardHeader className="pb-4">
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <Calendar className="h-5 w-5" />
-                            Flexible Scheduling
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-slate-700">
-                            We work around your schedule. Weekly, bi-weekly, and monthly service options available.
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
 
         {/* Contact Section */}
-        <section id="contact" className="py-16 sm:py-24 bg-gradient-to-b from-emerald-50 to-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 max-w-6xl mx-auto">
+        <section id="contact" className="py-24 bg-gradient-to-br from-primary to-emerald-900 text-white relative overflow-hidden">
+          {/* Abstract shapes */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid lg:grid-cols-2 gap-16">
               <div>
-                <Badge className="mb-4 bg-emerald-100 text-emerald-700 border-emerald-200">
-                  Get In Touch
-                </Badge>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-6">
-                  Your Dream Lawn Awaits
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-8">
+                  Start Your <br /><span className="text-secondary italic">Transformation</span>
                 </h2>
-                <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                  Ready to transform your lawn? Contact us today for a free quote and discover why Riverview residents trust American Dream Lawn Care Services.
+                <p className="text-xl text-white/80 mb-12 font-light max-w-lg">
+                  Ready to elevate your property? Contact us today for a consultation and complimentary quote.
                 </p>
 
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
-                      <Phone className="h-6 w-6 text-white" />
+                <div className="space-y-8">
+                  <div className="flex items-center gap-6 group">
+                    <div className="h-16 w-16 border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-primary transition-colors duration-300">
+                      <Phone className="h-6 w-6" />
                     </div>
                     <div>
-                      <div className="font-semibold text-slate-900">Phone</div>
-                      <a href="tel:+18135551234" className="text-emerald-600 hover:text-emerald-700 transition-colors text-lg">
-                        (813) 555-1234
-                      </a>
+                      <p className="text-sm uppercase tracking-widest text-secondary mb-1">Call Us</p>
+                      <p className="text-2xl font-serif">(813) 555-1234</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center flex-shrink-0">
-                      <Mail className="h-6 w-6 text-white" />
+                  <div className="flex items-center gap-6 group">
+                    <div className="h-16 w-16 border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-primary transition-colors duration-300">
+                      <Mail className="h-6 w-6" />
                     </div>
                     <div>
-                      <div className="font-semibold text-slate-900">Email</div>
-                      <a href="mailto:info@americandreamlawncare.com" className="text-emerald-600 hover:text-emerald-700 transition-colors">
-                        info@americandreamlawncare.com
-                      </a>
+                      <p className="text-sm uppercase tracking-widest text-secondary mb-1">Email Us</p>
+                      <p className="text-2xl font-serif text-white/90">info@americandream.com</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
-                      <MapPin className="h-6 w-6 text-white" />
+                  <div className="flex items-center gap-6 group">
+                    <div className="h-16 w-16 border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-primary transition-colors duration-300">
+                      <MapPin className="h-6 w-6" />
                     </div>
                     <div>
-                      <div className="font-semibold text-slate-900">Service Area</div>
-                      <div className="text-slate-700">
-                        Riverview, FL<br />
-                        Hillsborough County
-                      </div>
+                      <p className="text-sm uppercase tracking-widest text-secondary mb-1">Serving</p>
+                      <p className="text-2xl font-serif text-white/90">Riverview, FL & Surroundings</p>
                     </div>
                   </div>
-                </div>
-
-                {/* Quick Contact Buttons */}
-                <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                  <Button className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-base px-6 py-4 shadow-lg">
-                    <Phone className="mr-2 h-5 w-5" />
-                    Call Now
-                  </Button>
-                  <Button variant="outline" className="border-2 text-base px-6 py-4">
-                    <Calendar className="mr-2 h-5 w-5" />
-                    Schedule Service
-                  </Button>
                 </div>
               </div>
 
-              <Card className="border-2 shadow-xl">
-                <CardHeader>
-                  <CardTitle>Request a Free Quote</CardTitle>
-                  <CardDescription>Fill out the form and we'll get back to you within 24 hours.</CardDescription>
+              <Card className="bg-white/10 backdrop-blur-md border border-white/20 rounded-none shadow-2xl">
+                <CardHeader className="p-8 pb-2">
+                  <CardTitle className="text-2xl font-serif text-white">Request Consultation</CardTitle>
+                  <CardDescription className="text-white/60">We generally reply within one business day.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <form className="space-y-4">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label htmlFor="firstName" className="text-sm font-medium text-slate-700">
-                          First Name *
-                        </label>
-                        <Input id="firstName" placeholder="John" required />
-                      </div>
-                      <div className="space-y-2">
-                        <label htmlFor="lastName" className="text-sm font-medium text-slate-700">
-                          Last Name *
-                        </label>
-                        <Input id="lastName" placeholder="Doe" required />
-                      </div>
+                <CardContent className="p-8 pt-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs uppercase font-bold text-white/80">First Name</label>
+                      <Input className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-secondary" placeholder="John" />
                     </div>
                     <div className="space-y-2">
-                      <label htmlFor="phone" className="text-sm font-medium text-slate-700">
-                        Phone Number *
-                      </label>
-                      <Input id="phone" type="tel" placeholder="(813) 555-1234" required />
+                      <label className="text-xs uppercase font-bold text-white/80">Last Name</label>
+                      <Input className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-secondary" placeholder="Doe" />
                     </div>
-                    <div className="space-y-2">
-                      <label htmlFor="email" className="text-sm font-medium text-slate-700">
-                        Email
-                      </label>
-                      <Input id="email" type="email" placeholder="john@example.com" />
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="service" className="text-sm font-medium text-slate-700">
-                        Service Needed *
-                      </label>
-                      <select id="service" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                        <option value="">Select a service</option>
-                        <option value="mowing">Lawn Mowing</option>
-                        <option value="landscaping">Landscaping</option>
-                        <option value="tree-care">Tree & Shrub Care</option>
-                        <option value="irrigation">Irrigation Services</option>
-                        <option value="aeration">Aeration & Fertilization</option>
-                        <option value="cleanup">Seasonal Clean-Up</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="message" className="text-sm font-medium text-slate-700">
-                        Message
-                      </label>
-                      <Textarea id="message" placeholder="Tell us about your lawn care needs..." className="min-h-[120px]" />
-                    </div>
-                    <Button className="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700">
-                      Get Free Quote
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </form>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase font-bold text-white/80">Phone</label>
+                    <Input className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-secondary" placeholder="(555) 000-0000" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase font-bold text-white/80">Service</label>
+                    <select className="flex h-10 w-full rounded-none border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                      <option className="bg-primary text-white">Lawn Maintenance</option>
+                      <option className="bg-primary text-white">Landscaping Design</option>
+                      <option className="bg-primary text-white">Tree Services</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase font-bold text-white/80">Message</label>
+                    <Textarea className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-secondary min-h-[120px]" placeholder="How can we help?" />
+                  </div>
+                  <Button className="w-full bg-secondary hover:bg-white text-secondary-foreground hover:text-primary font-bold tracking-wide rounded-none h-12 text-lg transition-colors">
+                    Send Request
+                  </Button>
                 </CardContent>
               </Card>
             </div>
@@ -649,78 +437,23 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-auto bg-slate-900 text-white border-t border-slate-800">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Company Info */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-600 to-green-600 flex items-center justify-center">
-                  <Sprout className="h-6 w-6 text-white" />
-                </div>
-                <span className="text-xl font-bold">American Dream Lawn</span>
+      <footer className="bg-black text-white py-16 border-t border-white/10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 bg-secondary rounded flex items-center justify-center">
+                <Sprout className="h-5 w-5 text-primary-foreground" />
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Professional lawn care services in Riverview, Florida. Transforming ordinary yards into extraordinary outdoor spaces.
-              </p>
-              <Badge className="bg-gradient-to-r from-amber-400 to-amber-500 text-white border-0">
-                <Star className="h-3 w-3 mr-1 fill-white" />
-                5.0 Rating
-              </Badge>
+              <span className="text-xl font-serif font-bold">American Dream Lawn</span>
             </div>
-
-            {/* Services */}
-            <div>
-              <h3 className="font-semibold text-white mb-4">Services</h3>
-              <ul className="space-y-3">
-                <li><a href="#services" className="text-slate-400 hover:text-white transition-colors text-sm">Lawn Mowing</a></li>
-                <li><a href="#services" className="text-slate-400 hover:text-white transition-colors text-sm">Landscaping</a></li>
-                <li><a href="#services" className="text-slate-400 hover:text-white transition-colors text-sm">Tree & Shrub Care</a></li>
-                <li><a href="#services" className="text-slate-400 hover:text-white transition-colors text-sm">Irrigation</a></li>
-              </ul>
-            </div>
-
-            {/* Service Area */}
-            <div>
-              <h3 className="font-semibold text-white mb-4">Service Area</h3>
-              <ul className="space-y-3">
-                <li><a href="#service-area" className="text-slate-400 hover:text-white transition-colors text-sm">Riverview, FL</a></li>
-                <li><a href="#service-area" className="text-slate-400 hover:text-white transition-colors text-sm">Hillsborough County</a></li>
-                <li><a href="#service-area" className="text-slate-400 hover:text-white transition-colors text-sm">Residential</a></li>
-                <li><a href="#service-area" className="text-slate-400 hover:text-white transition-colors text-sm">Commercial</a></li>
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <h3 className="font-semibold text-white mb-4">Contact</h3>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-2">
-                  <Phone className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <a href="tel:+18135551234" className="text-slate-400 hover:text-white transition-colors text-sm">(813) 555-1234</a>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Mail className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <a href="mailto:info@americandreamlawncare.com" className="text-slate-400 hover:text-white transition-colors text-sm">info@americandreamlawncare.com</a>
-                </li>
-                <li className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-slate-400 text-sm">Riverview, FL</span>
-                </li>
-              </ul>
+            <div className="flex gap-8 text-sm uppercase tracking-widest text-white/60">
+              <a href="#" className="hover:text-secondary transition-colors">Privacy</a>
+              <a href="#" className="hover:text-secondary transition-colors">Terms</a>
+              <a href="#" className="hover:text-secondary transition-colors">Sitemap</a>
             </div>
           </div>
-
-          <div className="mt-12 pt-8 border-t border-slate-800">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-slate-400 text-sm text-center md:text-left">
-                © 2024 The American Dream Lawn Care Services. All rights reserved.
-              </p>
-              <div className="flex gap-6">
-                <a href="#" className="text-slate-400 hover:text-white transition-colors text-sm">Privacy Policy</a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors text-sm">Terms of Service</a>
-              </div>
-            </div>
+          <div className="text-center md:text-left text-white/40 text-sm">
+            © {new Date().getFullYear()} American Dream Lawn Care Services. All rights reserved.
           </div>
         </div>
       </footer>
